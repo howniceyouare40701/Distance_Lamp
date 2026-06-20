@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ff8fb8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tap Lamp">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Tap Night Lamp</title>
+    <style>
+:root {
+  color-scheme: light dark;
+  --bg: #32143f;
+  --panel: rgba(255, 248, 252, 0.82);
+  --panel-2: rgba(255, 255, 255, 0.7);
+  --text: #351338;
+  --muted: #855f87;
+  --line: rgba(135, 62, 112, 0.18);
+  --accent: #ff6fae;
+  --accent-2: #5bd4ff;
+  --green: #55d986;
+  --red: #ff6b7d;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(255, 244, 154, 0.95) 0 9%, transparent 27%),
+    radial-gradient(circle at 88% 16%, rgba(91, 212, 255, 0.78) 0 8%, transparent 28%),
+    radial-gradient(circle at 84% 78%, rgba(255, 111, 174, 0.9) 0 10%, transparent 30%),
+    linear-gradient(145deg, #ffd1e2 0%, #ffc58f 33%, #b891ff 68%, #67d8ff 100%);
+  background-attachment: fixed;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(100%, 520px);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: rgba(53, 19, 56, 0.68);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.95rem;
+  line-height: 1.05;
+  text-shadow: 0 2px 18px rgba(255, 255, 255, 0.58);
+}
+
+h2 {
+  font-size: 1rem;
+}
+
+.icon-button,
+.small-button,
+.wide-button,
+.command-button {
+  min-height: 44px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.icon-button {
+  width: 48px;
+  font-size: 1rem;
+}
+
+.status-panel,
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 18px 50px rgba(106, 42, 107, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(18px) saturate(1.18);
+}
+
+.status-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #ffb84f;
+  box-shadow: 0 0 0 4px rgba(255, 184, 79, 0.2), 0 0 20px rgba(255, 184, 79, 0.45);
+}
+
+.status-dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(85, 217, 134, 0.22), 0 0 22px rgba(85, 217, 134, 0.5);
+}
+
+#lastMessage {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.panel {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+}
+
+.segmented span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.segmented input:checked + span {
+  color: #fff8fc;
+  background: linear-gradient(135deg, var(--accent), #ff9f6e);
+  box-shadow: 0 8px 18px rgba(255, 111, 174, 0.26);
+}
+
+.topic-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.topic-list div {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.topic-list dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.topic-list dd {
+  min-width: 0;
+  margin: 0;
+  color: #5d3a63;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.command-button {
+  min-height: 74px;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.command-button.on {
+  background: linear-gradient(135deg, #4ee28b, #7df6cb);
+  color: #07391d;
+  box-shadow: 0 12px 26px rgba(69, 211, 133, 0.28);
+}
+
+.command-button.off {
+  background: linear-gradient(135deg, #ff6478, #ff9a7b);
+  color: #4d0710;
+  box-shadow: 0 12px 26px rgba(255, 100, 120, 0.28);
+}
+
+.color-picker {
+  width: 48px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.hue-slider {
+  width: 100%;
+  height: 34px;
+  margin: 0 0 14px;
+  accent-color: var(--accent);
+}
+
+.hue-slider::-webkit-slider-runnable-track {
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #ff0000 0%,
+    #ffff00 16.666%,
+    #00ff00 33.333%,
+    #00ffff 50%,
+    #0000ff 66.666%,
+    #ff00ff 83.333%,
+    #ff0000 100%
+  );
+}
+
+.hue-slider::-webkit-slider-thumb {
+  margin-top: -6px;
+}
+
+.wide-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #351338;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(255, 111, 174, 0.3);
+}
+
+.small-button {
+  padding: 0 14px;
+  color: #5d3a63;
+  font-weight: 700;
+}
+
+.firmware-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.2rem;
+  color: var(--muted);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.lamp-states {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lamp-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 248, 252, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.color-swatch {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  box-shadow: 0 8px 20px rgba(106, 42, 107, 0.18);
+  transition: background 0.3s;
+}
+
+.lamp-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lamp-color-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  margin-top: 2px;
+  color: var(--text);
+}
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="top-bar">
+        <div>
+          <p class="eyebrow">MQTT Lamp Controller</p>
+          <h1>Tap Night Lamp</h1>
+        </div>
+      </header>
+
+      <section class="status-panel" aria-live="polite">
+        <div id="statusDot" class="status-dot"></div>
+        <div>
+          <strong id="connectionTitle">Disconnected</strong>
+          <p id="lastMessage">Ready</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Representing</h2>
+        </div>
+
+        <div class="segmented" role="radiogroup" aria-label="Representing">
+          <label>
+            <input type="radio" name="identity" value="haha">
+            <span>Haha</span>
+          </label>
+          <label>
+            <input type="radio" name="identity" value="daniu">
+            <span>Daniu</span>
+          </label>
+        </div>
+
+        <dl class="topic-list">
+          <div>
+            <dt>Send</dt>
+            <dd id="sendTopic"></dd>
+          </div>
+          <div>
+            <dt>Listen</dt>
+            <dd id="listenTopic"></dd>
+          </div>
+        </dl>
+      </section>
+
+      <div class="lamp-states">
+        <div class="lamp-state">
+          <span class="color-swatch" id="mySwatch"></span>
+          <div>
+            <div class="lamp-label">My Lamp</div>
+          </div>
+        </div>
+        <div class="lamp-state">
+          <span class="color-swatch" id="pairedSwatch"></span>
+          <div>
+            <div class="lamp-label">Paired</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Color</h2>
+          <input id="colorPicker" class="color-picker" type="color" value="#ff0000" aria-label="Choose color">
+        </div>
+
+        <input id="hueSlider" class="hue-slider" type="range" min="0" max="360" value="0" aria-label="Rainbow color">
+
+        <button id="sendColorButton" class="wide-button" type="button">Send Color</button>
+      </section>
+
+      <section class="controls-grid">
+        <button id="onButton" class="command-button on" type="button">
+          <span>On</span>
+        </button>
+        <button id="offButton" class="command-button off" type="button">
+          <span>Off</span>
+        </button>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Firmware</h2>
+          <button id="firmwareButton" class="small-button" type="button" aria-label="Request firmware version">Refresh</button>
+        </div>
+        <p id="firmwareText" class="firmware-value">Unknown</p>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+const BROKER_URL = "wss://broker.hivemq.com:8884/mqtt";
+const DANIU_CMD = "Haniu/Distance_Lamp/Daniu/cmd";
+const HAHA_CMD = "Haniu/Distance_Lamp/Haha/cmd";
+
+const TOPICS = {
+  haha: {
+    label: "Haha",
+    stateAnnounce: HAHA_CMD,
+    localCtrl: DANIU_CMD,
+  },
+  daniu: {
+    label: "Daniu",
+    stateAnnounce: DANIU_CMD,
+    localCtrl: HAHA_CMD,
+  },
+};
+
+const state = {
+  client: null,
+  connected: false,
+  identity: localStorage.getItem("lampIdentity") || "haha",
+  browserId: localStorage.getItem("lampBrowserId") || Math.random().toString(16).slice(2, 10),
+  firmwareArmed: false,
+  myColor: null,
+  myOn: false,
+  pairedColor: null,
+  pairedOn: false,
+};
+
+localStorage.setItem("lampBrowserId", state.browserId);
+
+const elements = {
+  statusDot: document.querySelector("#statusDot"),
+  connectionTitle: document.querySelector("#connectionTitle"),
+  lastMessage: document.querySelector("#lastMessage"),
+  sendTopic: document.querySelector("#sendTopic"),
+  listenTopic: document.querySelector("#listenTopic"),
+  onButton: document.querySelector("#onButton"),
+  offButton: document.querySelector("#offButton"),
+  hueSlider: document.querySelector("#hueSlider"),
+  colorPicker: document.querySelector("#colorPicker"),
+  sendColorButton: document.querySelector("#sendColorButton"),
+  firmwareButton: document.querySelector("#firmwareButton"),
+  firmwareText: document.querySelector("#firmwareText"),
+  identityInputs: [...document.querySelectorAll("input[name='identity']")],
+  mySwatch: document.querySelector("#mySwatch"),
+  pairedSwatch: document.querySelector("#pairedSwatch"),
+};
+
+function currentTopics() {
+  return TOPICS[state.identity];
+}
+
+function setStatus(title, message) {
+  elements.connectionTitle.textContent = title;
+  elements.lastMessage.textContent = message;
+}
+
+function render() {
+  const topics = currentTopics();
+  elements.statusDot.classList.toggle("connected", state.connected);
+  elements.sendTopic.textContent = topics.stateAnnounce;
+  elements.listenTopic.textContent = topics.localCtrl;
+
+  for (const input of elements.identityInputs) {
+    input.checked = input.value === state.identity;
+  }
+}
+
+function connect() {
+  if (!window.mqtt) {
+    setStatus("Missing MQTT library", "Open this page with internet access so mqtt.js can load.");
+    return;
+  }
+
+  if (state.client) {
+    return;
+  }
+
+  const clientId = `tap-night-lamp-web-${state.identity}-${state.browserId}`;
+  setStatus("Connecting...", BROKER_URL);
+
+  state.client = mqtt.connect(BROKER_URL, {
+    clientId,
+    clean: true,
+    keepalive: 60,
+    reconnectPeriod: 2500,
+    connectTimeout: 8000,
+  });
+
+  state.client.on("connect", () => {
+    state.connected = true;
+    setStatus("Connected to HiveMQ", `Listening on ${currentTopics().localCtrl}`);
+    subscribeToResponseTopic();
+    render();
+  });
+
+  state.client.on("reconnect", () => {
+    setStatus("Reconnecting...", BROKER_URL);
+  });
+
+  state.client.on("close", () => {
+    state.connected = false;
+    setStatus("Disconnected", "Connection closed");
+    render();
+  });
+
+  state.client.on("error", (error) => {
+    setStatus("MQTT error", error.message || String(error));
+  });
+
+  state.client.on("message", handleMessage);
+}
+
+function disconnect() {
+  if (!state.client) {
+    return;
+  }
+
+  const client = state.client;
+  state.client = null;
+  client.end(true);
+  state.connected = false;
+  setStatus("Disconnected", "Ready");
+  render();
+}
+
+function subscribeToResponseTopic() {
+  if (!state.client || !state.connected) {
+    return;
+  }
+
+  const allTopics = Object.values(TOPICS).flatMap(t => [t.stateAnnounce, t.localCtrl]);
+  state.client.unsubscribe([...allTopics, DANIU_CMD, HAHA_CMD]);
+
+  for (const t of [DANIU_CMD, HAHA_CMD]) {
+    state.client.subscribe(t, { qos: 0 }, (error) => {
+      if (error) setStatus("Subscribe failed", error.message || String(error));
+    });
+  }
+}
+
+function publish(payload, topic) {
+  connect();
+
+  if (!state.client) {
+    return;
+  }
+
+  const target = topic || currentTopics().stateAnnounce;
+  const send = () => {
+    state.client.publish(target, payload, { qos: 0, retain: true }, (error) => {
+      if (error) {
+        setStatus("Publish failed", error.message || String(error));
+      } else {
+        setStatus("Connected to HiveMQ", `Sent ${payload}`);
+      }
+    });
+  };
+
+  if (state.connected) {
+    send();
+  } else {
+    state.client.once("connect", send);
+  }
+}
+
+function updateLampUI(target) {
+  const swatch = target === "my" ? elements.mySwatch : elements.pairedSwatch;
+  const on = target === "my" ? state.myOn : state.pairedOn;
+  const color = target === "my" ? state.myColor : state.pairedColor;
+
+  if (!on) {
+    swatch.style.background = "#2a2a2a";
+  } else if (color) {
+    swatch.style.background = color;
+  } else {
+    swatch.style.background = "#ffe8b0";
+  }
+}
+
+function handleMessage(topic, messageBuffer) {
+  const payload = messageBuffer.toString();
+  setStatus("Message received", `${topic}: ${payload}`);
+
+  const isMine = (topic === DANIU_CMD && state.identity === "daniu") ||
+                 (topic === HAHA_CMD && state.identity === "haha");
+
+  if (payload === "ON") {
+    if (isMine) { state.myOn = true; state.myColor = null; updateLampUI("my"); }
+    else        { state.pairedOn = true; state.pairedColor = null; updateLampUI("paired"); }
+    return;
+  }
+
+  if (payload === "OFF") {
+    if (isMine) { state.myOn = false; state.myColor = null; updateLampUI("my"); }
+    else        { state.pairedOn = false; state.pairedColor = null; updateLampUI("paired"); }
+    return;
+  }
+
+  if (payload.startsWith("COLOR:")) {
+    const parts = payload.substring(6).split(",");
+    if (parts.length === 3) {
+      const hex = "#" + [0,1,2].map(i => parseInt(parts[i]).toString(16).padStart(2, "0")).join("");
+      if (isMine) { state.myColor = hex; state.myOn = true; updateLampUI("my"); }
+      else        { state.pairedColor = hex; state.pairedOn = true; updateLampUI("paired"); }
+    }
+    return;
+  }
+
+  if (payload === "Firmware Ver:") {
+    state.firmwareArmed = true;
+    elements.firmwareText.textContent = "Reading...";
+    return;
+  }
+
+  if (state.firmwareArmed && /^\d+(\.\d+)*$/.test(payload)) {
+    state.firmwareArmed = false;
+    elements.firmwareText.textContent = payload;
+  }
+}
+
+function rgbFromHex(hex) {
+  const value = hex.replace("#", "");
+  return {
+    red: parseInt(value.slice(0, 2), 16),
+    green: parseInt(value.slice(2, 4), 16),
+    blue: parseInt(value.slice(4, 6), 16),
+  };
+}
+
+function hexFromHue(hue) {
+  const h = hue / 60;
+  const c = 255;
+  const x = Math.round(c * (1 - Math.abs(h % 2 - 1)));
+  let r, g, b;
+  if (h < 1)       { r = c; g = x; b = 0; }
+  else if (h < 2)  { r = x; g = c; b = 0; }
+  else if (h < 3)  { r = 0; g = c; b = x; }
+  else if (h < 4)  { r = 0; g = x; b = c; }
+  else if (h < 5)  { r = x; g = 0; b = c; }
+  else             { r = c; g = 0; b = x; }
+  return "#" + [r, g, b].map(c => c.toString(16).padStart(2, "0")).join("");
+}
+
+function sendSelectedColor() {
+  const color = rgbFromHex(elements.colorPicker.value);
+  const payload = `${color.red},${color.green},${color.blue}`;
+  publish(`COLOR:${payload}`, currentTopics().stateAnnounce);
+}
+
+for (const input of elements.identityInputs) {
+  input.addEventListener("change", () => {
+    state.identity = input.value;
+    localStorage.setItem("lampIdentity", state.identity);
+    elements.firmwareText.textContent = "Unknown";
+    state.firmwareArmed = false;
+    state.myColor = null; state.myOn = false;
+    state.pairedColor = null; state.pairedOn = false;
+    updateLampUI("my");
+    updateLampUI("paired");
+    subscribeToResponseTopic();
+    setStatus(
+      state.connected ? "Connected to HiveMQ" : "Disconnected",
+      `Using ${currentTopics().label}: send ${currentTopics().stateAnnounce}`
+    );
+    render();
+  });
+}
+
+elements.onButton.addEventListener("click", () => publish("ON"));
+elements.offButton.addEventListener("click", () => publish("OFF"));
+elements.sendColorButton.addEventListener("click", sendSelectedColor);
+elements.hueSlider.addEventListener("input", () => {
+  elements.colorPicker.value = hexFromHue(elements.hueSlider.value);
+});
+elements.firmwareButton.addEventListener("click", () => {
+  elements.firmwareText.textContent = "Reading...";
+  state.firmwareArmed = true;
+  publish("Firmware Version");
+});
+
+render();
+setStatus("Disconnected", "Ready");
+connect();
+    </script>
+  </body>
+</html>
